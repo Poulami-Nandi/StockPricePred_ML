@@ -46,15 +46,15 @@ df.isnull().sum()
 features = ['Open', 'High', 'Low', 'Close', 'Volume']
 plt.subplots(figsize=(20,10))
 for i, col in enumerate(features):
-plt.subplot(2,3,i+1)
-sb.distplot(df[col])
+	plt.subplot(2,3,i+1)
+	sb.distplot(df[col])
 plt.show()
 
 # Now do boxplots for those same columns 
 plt.subplots(figsize=(20,10))
 for i, col in enumerate(features):
-plt.subplot(2,3,i+1)
-sb.boxplot(df[col])
+	plt.subplot(2,3,i+1)
+	sb.boxplot(df[col])
 plt.show()
 
 # Feature Engineering 
@@ -72,8 +72,8 @@ df.head()
 data_grouped = df.groupby('year').mean()
 plt.subplots(figsize=(20,10))
 for i, col in enumerate(['Open', 'High', 'Low', 'Close']):
-plt.subplot(2,2,i+1)
-data_grouped[col].plot.bar()
+	plt.subplot(2,2,i+1)
+	data_grouped[col].plot.bar()
 plt.show()
 
 df.groupby('is_quarter_end').mean()
@@ -107,13 +107,13 @@ print(X_train.shape, X_valid.shape)
 models = [LogisticRegression(), SVC(
 kernel='poly', probability=True), XGBClassifier()]
 for i in range(3):
-models[i].fit(X_train, Y_train)
-print(f'{models[i]} : ')
-print('Training Accuracy : ', metrics.roc_auc_score(
+	models[i].fit(X_train, Y_train)
+	print(f'{models[i]} : ')
+	print('Training Accuracy : ', metrics.roc_auc_score(
 	Y_train, models[i].predict_proba(X_train)[:,1]))
-print('Validation Accuracy : ', metrics.roc_auc_score(
+	print('Validation Accuracy : ', metrics.roc_auc_score(
 	Y_valid, models[i].predict_proba(X_valid)[:,1]))
-print()
+	print()
 
 # Print the confusion matrix
 metrics.plot_confusion_matrix(models[0], X_valid, Y_valid)
