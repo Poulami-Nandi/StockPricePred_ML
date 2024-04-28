@@ -9,6 +9,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from xgboost import XGBClassifier
 from sklearn import metrics
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classification_report
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -58,10 +59,14 @@ for i, col in enumerate(features):
 plt.show()
 
 # Feature Engineering 
-splitted = df['Date'].str.split('/', expand=True)
-df['day'] = splitted[1].astype('int')
-df['month'] = splitted[0].astype('int')
-df['year'] = splitted[2].astype('int')
+splitted = df['Date'].str.split('-', expand=True)
+print(splitted)
+print("Dataframe shape: ", splitted.shape);
+df['day'] = splitted[2].astype('int')
+df['month'] = splitted[1].astype('int')
+df['year'] = splitted[0].astype('int')
+# drop Date column
+df = df.drop(['Date'], axis=1)
 df.head()
 
 # Now we have three more columns namely ‘day’, ‘month’ and ‘year’ derived from Date
@@ -69,7 +74,16 @@ df['is_quarter_end'] = np.where(df['month']%3==0,1,0)
 df.head()
 
 # Lets group data by Year and plot those 
-data_grouped = df.groupby('year').mean()
+print("df year: ", df['year'])
+print("Groupby output: ", df.groupby('year'))
+tmp = df.groupby('year')
+#print("tmp groupby output: ", tmp)
+#print("tmp groupby output BEFORE reset_index type: ", type(tmp))
+#tmp
+#tmp = tmp.reset_index()
+#print("tmp groupby output after reset_index: ", tmp.head())
+#print("tmp groupby output after reset_index data type: ", type(tmp))
+data_grouped = tmp.mean()
 plt.subplots(figsize=(20,10))
 for i, col in enumerate(['Open', 'High', 'Low', 'Close']):
 	plt.subplot(2,2,i+1)
@@ -104,8 +118,8 @@ X_train, X_valid, Y_train, Y_valid = train_test_split(
 print(X_train.shape, X_valid.shape)
 
 # Model development and Evaluation
-models = [LogisticRegression(), SVC(
-kernel='poly', probability=True), XGBClassifier()]
+clf = SVC(kernel='poly', probability=True)
+models = [LogisticRegression(), clf, XGBClassifier()]
 for i in range(3):
 	models[i].fit(X_train, Y_train)
 	print(f'{models[i]} : ')
@@ -113,8 +127,10 @@ for i in range(3):
 	Y_train, models[i].predict_proba(X_train)[:,1]))
 	print('Validation Accuracy : ', metrics.roc_auc_score(
 	Y_valid, models[i].predict_proba(X_valid)[:,1]))
+	Y_predicted = np.where(models[i].predict_proba(X_valid)[:,1] > 0.5, 1, 0)
+	cm = confusion_matrix(Y_valid, Y_predicted)
+	ConfusionMatrixDisplay(confusion_matrix=cm)
+	plt.show()
+	print("CONF MATRIX: \n", cm)
+	print(classification_report(Y_valid, Y_predicted))
 	print()
-
-# Print the confusion matrix
-metrics.plot_confusion_matrix(models[0], X_valid, Y_valid)
-plt.show()
